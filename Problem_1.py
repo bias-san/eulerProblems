@@ -10,11 +10,7 @@ sum = 0
 max_range = 1000
 
 for number in range(1, max_range, 1):
-    if number % 3 == 0:
+    if number % 3 == 0 or number % 5 == 0:
         # print(number)
         sum += number
-    elif number % 5 == 0:
-        # print(number)
-        sum += number
-
 print(sum)
