@@ -10,16 +10,40 @@ not necessarily distinct, prime factors:
 How many composite integers, n < 10^8, have precisely two,
 not necessarily distinct, prime factors?"""
 
+import itertools
 import time
 
-arr = [0] * 1000
+
+def erat2():
+    D = {}
+    yield 2
+    for q in itertools.islice(itertools.count(3), 0, None, 2):
+        p = D.pop(q, None)
+        if p is None:
+            D[q * q] = q
+            yield q
+        else:
+            x = p + q
+            while x in D or not (x & 1):
+                x += p
+            D[x] = p
+
 
 t = time.time()
-max_num = 100000
+max_num = 10 ** 8
+
+primes = [0] * max_num
+for i, j in enumerate(erat2()):
+    primes[i] = j
+    if j > max_num:
+        print(i)
+        break
+
+
+p_facts = [0] * max_num
 print("PROBLEM 187")
 print("calculating...")
 total_two_composites = 0
-set_of_tested_nums = set()
 
 number = 2
 while True:
@@ -27,32 +51,31 @@ while True:
     continueFlag = True
     orig_number = number
     prime_factors = 0
-    divisor = 2
+    index = 0
     # print(f"Zerlegung von {orig_number}")
+
     while continueFlag:
-        if number % divisor != 0:
-            if divisor == 2:
-                divisor += 1
-            else:
-                divisor += 2
+        if number % primes[index] != 0:
+            index += 1
+
         else:
-            number = int(number / divisor)
+            number = int(number / primes[index])
             prime_factors += 1
-            if (prime_factors == 2 and number != 1) or (
-                number in set_of_tested_nums
-            ):
+            total_prime_factors = prime_factors + p_facts[number]
+            if total_prime_factors > 2:
                 continueFlag = False
                 finished = False
-
-            if number == 1:
-                finished = True
+            elif total_prime_factors == 2:
                 continueFlag = False
+                finished = True
+                total_two_composites += 1
+                # print(f"{orig_number} is a composite integer")
+            elif number == 1:
+                continueFlag = False
+                finished = True
 
-    if finished and prime_factors == 2:
-        # print(f"{orig_number} is a composite integer")
-        total_two_composites += 1
-    if prime_factors > 1:
-        set_of_tested_nums.add(orig_number)
+    p_facts[orig_number] = total_prime_factors
+
     number = orig_number + 1
     if number == max_num:
         break
